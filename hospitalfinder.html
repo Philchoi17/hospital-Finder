@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #locContainer
+        {
+            margin-bottom:50px;
+        }
+        #locFind
+        {
+            height: 50px;
+            width: 150px;
+            font-size: 24px;
+        }
+        #submitButton 
+        {
+            margin-top:50px;
+        }
+        .hospitalName
+        {
+            font-size:36px;
+            font-weight:bold;
+            border-top: 1px solid black;
+        }
+        .address
+        {
+            font-style:oblique;
+            color:grey;
+        }
+        .zip
+        {
+            font-style:italic;
+            color:grey;
+        }
+        .website
+        {
+            color:grey;
+        }
+        .phone
+        {
+            color:grey;
+            border-bottom:1px solid black;
+        }
+        .title
+        {
+            font-weight:bolder;
+            font-family:sans-serif;
+            text-decoration:underline;
+            font-size:24px;
+        }
+        h1
+        {
+            text-align:center;
+            font-size: 4em;
+        }
+        form
+        {
+            text-align:center;
+        }
+        #searchBar
+        {
+            margin-bottom:50px;
+            height: 50px;
+            width: 150px;
+            font-size:24px;
+        }
+        #minBeds
+        {
+            height:50px;
+            font-size:24px;
+            width:75px;
+        }
+        #hospitalMatches 
+        {
+            margin-left:100px;
+            /* text-decoration:underline; */
+        }
+        #matchedResults 
+        {
+            text-decoration:none;
+        }
+        #matched
+        {
+            text-decoration:underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Hospital Finder</h1>
+    <form>
+        <label for="searchBar">Search:</label>
+        <input type="text" name="name" id="searchBar"> <br>
+        <label for="locFind">Province:</label>
+        <div id="locContainer">
+            <select type="text" name="province" id="locFind">
+                <option value ="nonSelect">지역 찼기</option>
+                <option value="경기도">경기도</option>
+                <option value="제주특별자치도">제주특별자치도</option>
+                <option value="강원도">강원도</option>
+                <option value="충청남도">충청남도</option>
+                <option value="전라북도">전라북도</option>
+                <option value="전라남도">전라남도</option>
+                <option value="경상남도">경상남도</option>
+                <option value="경상북도">경상북도</option>
+                <option value="충청북도">충청북도</option>
+                <option value="다">다찼기</option>
+            </select>
+        </div>
+        <div id="minBedContainer">
+            <label for="minBeds">Minimum Available Beds:</label>
+            <input type="number" name="availableBeds" id="minBeds" value=0>
+        </div>
+        
+        <button id="submitButton" type="button">Submit</button>
+    </form>
+
+    <div id="hospitalMatches">
+        <h2 id = "matched">MATCHED RESULTS:</h2>
+        <div id="matchedresults"></div>
+    </div>
+    <script>
+    
+        var subButton = document.getElementById("submitButton");
+        var submit = true;
+
+        subButton.addEventListener("click", function()
+        {
+            if(document.getElementById("locFind").value === "nonSelect")
+            {
+                alert("지역선택해주세요");
+                document.getElementById("locFind").style.color = "red";
+                submit = false;
+            }
+            
+            if(document.getElementById("minBeds").value === "")
+            {
+                document.getElementById("minBeds").value === 0;
+                submit = false;
+            }
+            // if(document.getElementById("searchBar").value === "")
+            // {
+            //     submit = false;
+            // }
+            if(submit === true)
+            {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function()
+                {
+                    if (this.readyState === 4 && this.status === 200)
+                    {
+                        var hospitalInfo = xhttp.responseText;
+                        //alert(hospitalInfo);
+                        var hospitalInfoObj = JSON.parse(hospitalInfo);
+                        // console.log(hospitalInfoObj);
+                        hospitalInfoObj.sort(function(first, second)
+                        {
+                            return second.numBeds - first.numBeds;
+                        })
+                        document.getElementById("matchedresults").innerHTML ="";
+                        for(var i = 0; i < hospitalInfoObj.length; i++)
+                        {
+                            var availSingleHosp = hospitalInfoObj[i];
+                            // console.log(availSingleHosp.name);
+                            // console.log(availSingleHosp.name);
+                            document.getElementById("matchedresults").innerHTML +=  "<h2 class = 'hospitalName'>" + "<span class='title'>병원명:</span>" + availSingleHosp.name + "(" + availSingleHosp.numBeds + ")" + "</h2>" + "<p class='address'>" + availSingleHosp.address + "</p>" + "<p class='zip'>" + availSingleHosp.zip + "</p>" + "<a href ="+ '"'+ availSingleHosp.website + '">' + "<p class ='website'>" + availSingleHosp.website + "</p>" + "</a>" + "<p class='phone'>" + availSingleHosp.phone + "</p>";
+                            
+
+                        }
+                        // document.getElementById("matchedresults").innerHTML = hospitalInfo;
+                        
+                    }
+
+                    // if(document.getElementById("minBeds").value )
+
+                }
+                xhttp.open("POST", "publichealth_php.php");
+                xhttp.setRequestHeader("Content-Type", "application/json");
+                // var sending = "{\"name\":" + "\"" + document.getElementById("searchBar").value + "\"" + "," + "\"province\":" + "\"" + document.getElementById("locFind").value + '",' + '"minBeds":' + document.getElementById("minBeds").value + '}';
+                // xhttp.send("{\"name\":" + document.getElementById("searchBar").value + "," + "\"province\":" + document.getElementById("locFind").value + '",' + '"minBeds":' + document.getElementById("minBeds").value + '}');
+                // xhttp.send(sending);
+                // console.log(sending);
+                // var sendingObj = [{}];
+                // sendingObj = sendingObj.name = document.getElementById("searchBar").value;
+                // sendingObj += sendingObj.province = document.getElementById("locFind").value;
+                // sendingObj += sendingObj.minBeds = document.getElementById("minBeds").value;
+                // sendingObj.push({name: document.getElementById("searchBar").value, province: document.getElementById("locFind").value, minBeds: document.getElementById("minBeds").value});
+                // if(document.getElementById("searchBar").value !== "" && document.getElementById("locFind").value !== "" && document.getElementById("minBeds").value !== "")
+                // {
+                //     var sendingObj = 
+                //     {
+                //         name: document.getElementById("searchBar").value,
+                //         province: document.getElementById("locFind").value,
+                //         minBeds: Number(document.getElementById("minBeds").value)
+                //     };
+                //     // console.log(typeof sendingObj.minBeds);
+                //     // console.log(JSON.stringify(sendingObj));
+                //     var sendingObjStr = JSON.stringify(sendingObj);
+                //     xhttp.send(sendingObjStr);
+                // }
+                // if(document.getElementById("searchBar").value === "")
+                // {
+                //     var sendingObj2 =
+                //     {
+                //         province: document.getElementById("locFind").value,
+                //         minBeds: Number(document.getElementById("minBeds").value)
+                //     };
+                //     var sendingObj2Str = JSON.stringify(sendingObj2);
+                //     xhttp.send(sendingObj2Str);
+                // }
+                var sendObj = 
+                    {
+                        province: document.getElementById("locFind").value,
+                    };
+                if (document.getElementById("minBeds").value !== "") sendObj.minBeds = Number(document.getElementById("minBeds").value);
+                if (document.getElementById("searchBar").value !== "") sendObj.name = document.getElementById("searchBar").value;
+
+                var sendingObjStr = JSON.stringify(sendObj);
+                xhttp.send(sendingObjStr);
+            }
+        });
+
+        document.getElementById("locFind").addEventListener("change", function()
+        {
+            if(document.getElementById("locFind").value !== "nonSelect")
+            {
+                document.getElementById("locFind").style.color = "black";
+            }
+        });
+
+    </script>
+</body>
+</html>
